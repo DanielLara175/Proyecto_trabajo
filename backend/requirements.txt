@@ -1,0 +1,11 @@
+# aqui se instalan todas las librerias 
+fastapi
+uvicorn
+sqlalchemy
+pymysql
+python-dotenv
+cryptography
+passlib[bcrypt]
+pydantic[email]
+
+pydantic[email]

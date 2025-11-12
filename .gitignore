@@ -1,0 +1,13 @@
+# Ignorar bases de datos locales de MySQL
+mysql_data/
+
+# Ignorar archivos temporales o de sistema
+*.log
+*.tmp
+
+# Ignorar node_modules o builds
+node_modules/
+dist/
+
+# Ignorar subrepos locales
+frontend/sena-frontend/
