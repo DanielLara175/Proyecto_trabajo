@@ -19,6 +19,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.exc import SQLAlchemyError
+import time
 
 # Cargar variables de entorno desde el archivo .env (usado fuera de Docker)
 load_dotenv()
@@ -91,3 +92,72 @@ def get_db():
         if db is not None:
             db.close()
             db = None
+# ============================================================
+# 7. Conexión directa MySQL para excel_router
+# ============================================================
+# El módulo excel_router necesita conexiones directas MySQL (sin ORM)
+# para operaciones de inserción masiva y manejo de transacciones.
+
+import mysql.connector
+from mysql.connector import Error as MySQLError
+
+class DirectMySQLConnection:
+    """
+    Clase para manejar conexiones directas a MySQL sin SQLAlchemy.
+    Usada específicamente por el módulo de carga de Excel.
+    """
+    
+    def __init__(self):
+        # Reutiliza las mismas credenciales del archivo .env
+        self.host = DB_HOST
+        self.user = DB_USER
+        self.password = DB_PASSWORD
+        self.database = DB_NAME
+        self.port = int(DB_PORT)
+        self.connection = None
+
+    def connect(self):
+        """Establece conexión directa con MySQL"""
+        try:
+            self.connection = mysql.connector.connect(
+                host=self.host,
+                user=self.user,
+                password=self.password,
+                database=self.database,
+                port=self.port
+            )
+            if self.connection.is_connected():
+                print(f"✅ Conexión directa MySQL establecida con {self.database}")
+                return self.connection
+        except MySQLError as e:
+            print(f"❌ Error al conectar a MySQL: {e}")
+            raise e
+
+    def disconnect(self):
+        """Cierra la conexión"""
+        if self.connection and self.connection.is_connected():
+            self.connection.close()
+            print("🔌 Conexión directa MySQL cerrada")
+
+    def get_connection(self):
+        """Obtiene una conexión activa"""
+        if not self.connection or not self.connection.is_connected():
+            self.connect()
+        return self.connection
+
+
+# Instancia global para conexiones directas
+_direct_mysql = DirectMySQLConnection()
+
+
+def get_db_connection():
+    """
+    Función para obtener conexión directa MySQL (sin ORM).
+    
+    Esta función es utilizada por el router excel_router.py para
+    realizar operaciones de inserción masiva de datos desde archivos Excel.
+    
+    Returns:
+        mysql.connector.connection.MySQLConnection: Conexión activa a MySQL
+    """
+    return _direct_mysql.get_connection()

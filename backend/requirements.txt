@@ -1,11 +1,15 @@
-# aqui se instalan todas las librerias 
 fastapi
 uvicorn
 sqlalchemy
 pymysql
 python-dotenv
+pandas
+openpyxl
+pydantic[email]
+email-validator
 cryptography
-passlib[bcrypt]
-pydantic[email]
-
-pydantic[email]
+pandas
+openpyxl
+mysql-connector-python==8.2.0
+websockets==12.0
+python-multipart

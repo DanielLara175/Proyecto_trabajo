@@ -1,5 +1,6 @@
-services:
+version: '3.7'
 
+services:
   db:
     image: mysql:8
     container_name: mysql_db
@@ -17,7 +18,7 @@ services:
       timeout: 3s
       retries: 10
     networks:
-      - internal_net   
+      - internal_net
 
   app:
     build: ./backend
@@ -28,12 +29,11 @@ services:
     ports:
       - "8000:8000"
     depends_on:
-      db:
-        condition: service_healthy
+      - db
     environment:
       DATABASE_URL: mysql://daniel:daniel123@db:3306/lara_bs
     command: >
-      sh -c "sleep 10 && uvicorn app.main:app --host 0.0.0.0 --port 8000"
+      sh -c "sleep 10 && uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload"
     healthcheck:
       test: ["CMD-SHELL", "curl -f http://localhost:8000/health || exit 1"]
       interval: 30s
@@ -41,7 +41,7 @@ services:
       retries: 3
       start_period: 20s
     networks:
-      - internal_net   
+      - internal_net
 
   frontend:
     build: ./frontend/sena-frontend
@@ -56,7 +56,7 @@ services:
     environment:
       - API_URL=http://app:8000
     networks:
-      - internal_net   
+      - internal_net
 
 volumes:
   mysql_data:
